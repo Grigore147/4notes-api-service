@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Run Dockerfile's CMD (default: $> php-fpm )
+echo "▣ Starting... cmd: ${@}"
+
+exec tini -- "${@}"

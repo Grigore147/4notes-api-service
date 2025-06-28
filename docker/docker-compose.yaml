@@ -1,0 +1,278 @@
+name: "4notes"
+
+x-app-default-env: &app-default-env
+  PROJECT_NAME: 4notes
+  APP_ENV: local
+  APP_DEBUG: true
+
+services:
+  4notes-api-nginx-service:
+    container_name: 4notes-api-nginx-service
+    restart: unless-stopped
+    image: 4notes/api-nginx:latest
+    build:
+      context: .
+      dockerfile: ./docker/nginx/Dockerfile
+      target: nginx-development
+      args:
+        NGINX_VERSION: ${NGINX_VERSION}
+        PHP_FPM_HOST: ${PHP_FPM_HOST}
+        PHP_FPM_PORT: ${PHP_FPM_PORT}
+        APP_PATH: ${APP_PATH}
+    environment:
+      << : *app-default-env
+      SERVICE_NAME: 4notes-api-nginx-service
+      SERVICE_VERSION: 1.0.0
+    ports:
+      - 0.0.0.0:8080:8080
+    volumes:
+      - ./public:/app/public
+    depends_on:
+      - 4notes-api-app-service
+    networks:
+      - 4notes-network
+
+  4notes-api-app-bootstrap:
+    container_name: 4notes-api-app-bootstrap
+    image: 4notes/api:latest
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      target: app-development
+    environment:
+      << : *app-default-env
+      SERVICE_VERSION: 1.0.0
+      APP_ENV_EXAMPLE: /app/.env.compose.example
+      APP_URL: https://4notes.app
+      APP_KEY: ${APP_KEY}
+    command: ["app-bootstrap", "local"]
+    restart: on-failure
+    volumes:
+      - .:/app
+    depends_on:
+      4notes-database:
+        condition: service_healthy
+      4notes-redis:
+        condition: service_healthy
+    networks:
+      - 4notes-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  4notes-api-app-service:
+    container_name: 4notes-api-app-service
+    image: 4notes/api:latest
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      target: app-development
+    environment: 
+      << : *app-default-env
+      SERVICE_VERSION: 1.0.0
+      APP_ENV_EXAMPLE: /app/.env.compose.example
+      APP_URL: https://4notes.app
+      APP_KEY: ${APP_KEY}
+    volumes:
+      - .:/app
+    healthcheck:
+      test: ["CMD", "pgrep", "php-fpm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+    depends_on:
+      4notes-database:
+        condition: service_healthy
+        restart: true
+      4notes-redis:
+        condition: service_healthy
+      4notes-api-app-bootstrap:
+        condition: service_completed_successfully
+    networks:
+      - 4notes-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  
+  4notes-api-supervisor:
+    container_name: 4notes-api-supervisor
+    image: 4notes/api-app-supervisor:latest
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+      target: app-supervisor
+    environment:
+      << : *app-default-env
+      SERVICE_VERSION: 1.0.0
+      APP_ENV_EXAMPLE: /app/.env.compose.example
+      APP_URL: https://4notes.app
+      APP_KEY: ${APP_KEY}
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    depends_on:
+      4notes-database:
+        condition: service_healthy
+        restart: true
+      4notes-redis:
+        condition: service_healthy
+      4notes-api-app-service:
+        condition: service_healthy
+    networks:
+      - 4notes-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  4notes-database:
+    container_name: 4notes-database
+    image: postgres:17.0-alpine3.20
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+    volumes:
+      - 4notes-api-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/entrypoints/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: |
+        pg_isready --host 0.0.0.0 --dbname notes --username notes && \
+        psql --host 0.0.0.0 --dbname notes --username notes -c 'SELECT 1' \
+        || exit 1
+      start_period: 10s
+      interval: 5s
+      retries: 5
+      timeout: 5s
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:5432:5432
+    networks:
+      - 4notes-network
+
+  # 4notes-database:
+  #   image: mariadb:11.0.2
+  #   container_name: 4notes-database
+  #   environment:
+  #     MARIADB_DATABASE: '${DB_DATABASE}'
+  #     MARIADB_ROOT_PASSWORD: '${DB_PASSWORD}'
+  #     MARIADB_PASSWORD: '${DB_PASSWORD}'
+  #     MARIADB_USER: '${DB_USERNAME}'
+  #     MARIADB_ALLOW_EMPTY_PASSWORD: 'yes'
+  #   healthcheck:
+  #     test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+  #     start_period: 10s
+  #     interval: 10s
+  #     retries: 3
+  #     timeout: 5s
+  #   volumes:
+  #     - ./docker/mariadb/entrypoints/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   ports:
+  #     - 127.0.0.1:${DB_PORT}:3306
+  #   networks:
+  #     - 4notes-network
+
+  4notes-redis:
+    image: redis:7.2-rc-alpine3.18
+    container_name: 4notes-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      start_period: 10s
+      interval: 10s
+      retries: 3
+      timeout: 5s
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:6379:6379
+    networks:
+      - 4notes-network
+
+  4notes-mailhog:
+    container_name: 4notes-mailhog
+    image: 'mailhog/mailhog:latest'
+    ports:
+      - '127.0.0.1:8025:8025'
+    networks:
+      - 4notes-network
+
+  redpanda:
+    container_name: redpanda
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.21
+    command:
+      - redpanda
+      - start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      - --pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr internal://redpanda:8082,external://localhost:18082
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr redpanda:33145
+      - --advertise-rpc-addr redpanda:33145
+      - --smp 1
+      - --default-log-level=info
+    ports:
+      - 127.0.0.1:18081:18081
+      - 127.0.0.1:18082:18082
+      - 127.0.0.1:19092:19092
+      - 127.0.0.1:19644:9644
+    volumes:
+      - redpanda:/var/lib/redpanda/data
+    networks:
+      - 4notes-network
+
+  redpanda-console:
+    container_name: redpanda-console
+    image: docker.redpanda.com/redpandadata/console:v3.0.0
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml; /app/console'
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda:9092"]
+          # schemaRegistry:
+          #   enabled: true
+          #   urls: ["http://redpanda:8081"]
+        redpanda:
+          adminApi:
+            enabled: true
+            urls: ["http://redpanda:9644"]
+    ports:
+      - 127.0.0.1:9090:8080
+    depends_on:
+      - redpanda
+    networks:
+      - 4notes-network
+
+volumes:
+  4notes-api-postgres-data:
+    name: 4notes-api-postgres-data
+    driver: local
+    labels:
+      - "app.4notes.project=4notes"
+  redpanda: null
+
+# configs:
+  # app-env:
+  #   name: app-env
+  #   file: ./.env.compose.example
+  #   labels:
+  #     - "app.4notes.project=4notes"
+
+networks:
+  # Common network for all services in the project within local development environment
+  # NOTE: Keep the network name consistent with the project name to be able access services by service name within the network.
+  4notes-network:
+    name: 4notes-network
+    driver: bridge
+    attachable: true
+    # external: true
+    labels:
+      - "app.4notes.project=4notes"
+    # ipam:
+    #   driver: default
+    #   config:
+    #     - subnet: 10.10.0.0/24
+    #       gateway: 10.10.0.1
+
+# networks:
+#   default:
+#     external:
+#       name: 4notes-network

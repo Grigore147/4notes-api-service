@@ -1,0 +1,35 @@
+# !IMPORTANT:
+# This config is done by white-listing, rather then black-listing, as a better practice.
+# So add only files/directories that should end up in the Docker image.
+
+# Ignore everything
+*
+
+# Allow files and directories with a pattern starting with !
+!app/
+!bootstrap/
+!config/
+!database/
+!modules/
+!public/
+!resources/
+!routes/
+!storage/
+!tests/
+!.env.example
+!.env.compose.example
+!artisan
+!composer.json
+!composer.lock
+!phpunit.xml
+!package.json
+!package-lock.json
+!postcss.config.js
+!tailwind.config.js
+!vite.config.js
+!Taskfile.yaml
+
+# NOTE: this is required to be white-listed here, since if it's ignored by the dockerignore,
+# it would not be available for the COPY/ADD commands from the Dockerfile builds...
+# As a better practice, we should keep docker/ folder on top level and everything app related under src/ directory...
+!docker/

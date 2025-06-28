@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+
+# Bootstrap Application
+# app-bootstrap production
+
+# Run Entrypoint and pass CMD to it (Don't forget exec)
+exec entrypoint-base "${@}"

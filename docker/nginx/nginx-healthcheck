@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -eu
+
+curl -fs http://localhost:8080/nginx_status || exit 1;
