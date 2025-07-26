@@ -33,7 +33,7 @@ final class AuthService
     public function getUserByToken(string $token): ?Authenticatable {
         $response = Http::acceptJson()
             ->withToken($token)
-            ->get($this->apiUrl.'/user');
+            ->get($this->apiUrl.'/users/profile');
 
         if ($response->successful()) {
             return new User($response->json('data'));

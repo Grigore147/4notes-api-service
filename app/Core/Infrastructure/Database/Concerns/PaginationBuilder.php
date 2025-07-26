@@ -49,7 +49,11 @@ final class PaginationBuilder
         }
 
         if (Arr::has($parameters, 'page')) {
-            $pagination['offset'] = ((int)$parameters['page'] - 1) * $pagination['limit'];
+            $page = (int)$parameters['page'];
+
+            if ($page < 1) { $page = 1; }
+
+            $pagination['offset'] = ($page - 1) * $pagination['limit'];
         }
 
         return $pagination;

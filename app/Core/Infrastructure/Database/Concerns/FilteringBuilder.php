@@ -89,6 +89,7 @@ final class FilteringBuilder
             'include',
             'search',
             'limit',
+            'offset',
             'fields',
             'q',
         ];
@@ -106,6 +107,10 @@ final class FilteringBuilder
             }
 
             $operator = 'is';
+
+            if (is_array($value)) {
+                $operator = 'in';
+            }
 
             if (is_string($value) && preg_match(
                     '/^(eq|is|ne|not|lt|lte|gt|gte|in|notin|q|like|notlike|start|end|null):((.+)?)$/i',

@@ -13,8 +13,8 @@ use App\Domains\Note\Domain\Entities\Contracts\SpaceEntityContract;
 final class Space extends Entity implements SpaceEntityContract
 {
     public function __construct(
-        ?UuidInterface $id = null,
-        ?UuidInterface $userId = null,
+        UuidInterface|string|null $id = null,
+        UuidInterface|string|null $userId = null,
         string $name = '',
         string $description = '',
         ?Carbon $createdAt = null,
@@ -23,7 +23,7 @@ final class Space extends Entity implements SpaceEntityContract
         $this->initAttributes(get_defined_vars());
     }
 
-    public function getUserId(): UuidInterface
+    public function getUserId(): UuidInterface|string
     {
         return $this->getAttribute('userId');
     }

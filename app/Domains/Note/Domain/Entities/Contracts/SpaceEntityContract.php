@@ -20,9 +20,9 @@ interface SpaceEntityContract extends EntityContract
     /**
      * Get the user ID of the space's owner.
      *
-     * @return UuidInterface
+     * @return UuidInterface|string
      */
-    public function getUserId(): UuidInterface;
+    public function getUserId(): UuidInterface|string;
 
     /**
      * Get the space's name.

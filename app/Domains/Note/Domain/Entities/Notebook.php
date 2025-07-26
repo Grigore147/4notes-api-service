@@ -26,7 +26,7 @@ final class Notebook extends Entity implements NotebookEntityContract
         $this->initAttributes(get_defined_vars());
     }
 
-    public function getUserId(): UuidInterface
+    public function getUserId(): UuidInterface|string
     {
         return $this->getAttribute('userId');
     }
