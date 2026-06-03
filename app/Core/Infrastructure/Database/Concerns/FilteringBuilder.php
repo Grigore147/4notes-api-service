@@ -165,14 +165,14 @@ final class FilteringBuilder
                     $query->orWhereHas($table, function ($query) use ($attr, $searchQuery, $subAttr) {
                         if ($subAttr) {
                             $query->whereHas($attr, function ($query) use ($subAttr, $searchQuery) {
-                                $query->where($subAttr, 'like', '%'. $searchQuery .'%');
+                                $query->whereLike($subAttr, '%'. $searchQuery .'%');
                             });
                         } else {
-                            $query->where($attr, 'like', '%'. $searchQuery .'%');
+                            $query->whereLike($attr, '%'. $searchQuery .'%');
                         }
                     });
                 } else {
-                    $query->orWhere($model->getTable() .'.'. $attr, 'like', '%'. $searchQuery .'%');
+                    $query->orWhereLike($model->getTable() .'.'. $attr, '%'. $searchQuery .'%');
                 }
             }
         });

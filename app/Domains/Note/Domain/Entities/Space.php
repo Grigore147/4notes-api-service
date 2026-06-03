@@ -9,6 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 use App\Core\Support\Undefined;
 use App\Core\Domain\Entities\Entity;
 use App\Domains\Note\Domain\Entities\Contracts\SpaceEntityContract;
+use Illuminate\Support\Collection;
 
 final class Space extends Entity implements SpaceEntityContract
 {
@@ -17,6 +18,8 @@ final class Space extends Entity implements SpaceEntityContract
         UuidInterface|string|null $userId = null,
         string $name = '',
         string $description = '',
+        ?Collection $stacks = null,
+        ?Collection $notebooks = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {

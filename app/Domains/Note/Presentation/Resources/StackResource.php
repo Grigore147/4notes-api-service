@@ -6,6 +6,7 @@ namespace App\Domains\Note\Presentation\Resources;
 
 use Illuminate\Http\Request;
 use App\Core\Presentation\Resources\JsonResource;
+use App\Domains\Note\Domain\Repositories\NotebooksRepository;
 use App\Domains\Note\Domain\Repositories\SpacesRepository;
 use App\Domains\Note\Presentation\Resources\SpaceResource;
 
@@ -36,15 +37,19 @@ final class StackResource extends JsonResource
         return $this->onlySelected([
             'id' => $this->id,
             'spaceId' => $this->spaceId,
-            'space' => $this->whenNotNull(
+            'space' => $this->whenHasResource(
                 SpaceResource::make(
-                    app(SpacesRepository::class)->toEntity($this->space)
+                    app(SpacesRepository::class)->toEntity($this->space),
+                    $request
                 )
             ),
             'userId' => $this->userId,
             'name' => $this->name,
             'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt
+            'updatedAt' => $this->updatedAt,
+            'notebooks' => $this->whenHasCollection(
+                $this->notebooks, fn () => NotebookCollection::make(app(NotebooksRepository::class)->toEntities($this->notebooks)), $request
+            )
         ]);
     }
 }

@@ -43,7 +43,7 @@ interface EntityContract extends HasAttributesContract
      * @param bool $asDirty
      * @return static
      */
-    public static function fromArray(array $data, $asDirty = false): self;
+    public static function fromArray(array $data, $asDirty = false): static;
 
     /**
      * Determine if the entity is new.

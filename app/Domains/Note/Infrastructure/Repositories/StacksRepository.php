@@ -80,6 +80,7 @@ final class StacksRepository extends Repository implements StacksRepositoryContr
             spaceId: Uuid::fromString($stack->space_id),
             space: $stack->relation('space'),
             name: $stack->name,
+            notebooks: $stack->relation('notebooks'),
             createdAt: $stack->created_at,
             updatedAt: $stack->updated_at
         );

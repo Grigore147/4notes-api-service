@@ -22,6 +22,6 @@ final class GetStackByIdHandler
 
     public function handle(GetStackById $query): StackEntityContract
     {
-        return $this->stacksRepository->getById($query->id);
+        return $this->stacksRepository->getById($query->id, $query->filters);
     }
 }

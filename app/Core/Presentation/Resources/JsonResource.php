@@ -115,6 +115,15 @@ abstract class JsonResource extends IlluminateJsonResource // @pest-arch-ignore-
         return func_num_args() === 2 ? value($default) : new MissingValue;
     }
 
+    public function whenHasCollection(mixed $collection, Callable $fn, Request $request)
+    {
+        return $this->whenNotNull(
+            $collection ?
+                $fn()->resolve($request)['data']
+            : null
+        );
+    }
+
     /**
      * Get any additional data that should be returned with the resource array.
      *

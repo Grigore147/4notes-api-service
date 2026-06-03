@@ -17,8 +17,7 @@ final class Stack extends BaseModel
 {
     use HasUuids, HasFactory;
 
-    public static $factory = StackFactory::class;
-
+    public static string $factory = StackFactory::class;
     public static string $builder = StackBuilder::class;
 
     protected $keyType = 'string';
@@ -47,7 +46,8 @@ final class Stack extends BaseModel
     ];
     protected $sortable = ['*'];
     protected $includable = [
-        'space'
+        'space',
+        'notebooks'
     ];
 
     public function space()

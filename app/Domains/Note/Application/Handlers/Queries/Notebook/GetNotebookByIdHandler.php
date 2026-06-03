@@ -22,6 +22,6 @@ final class GetNotebookByIdHandler
 
     public function handle(GetNotebookById $query): NotebookEntityContract
     {
-        return $this->notebooksRepository->getById($query->id);
+        return $this->notebooksRepository->getById($query->id, $query->filters);
     }
 }

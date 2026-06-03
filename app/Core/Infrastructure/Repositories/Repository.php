@@ -219,7 +219,7 @@ abstract class Repository implements RepositoryContract // @pest-arch-ignore-lin
     /**
      * @inheritDoc
      */
-    public function toEntities(Collection|LengthAwarePaginator $items): Collection|LengthAwarePaginator
+    public function toEntities(Collection|LengthAwarePaginator $items): Collection|AbstractPaginator|LengthAwarePaginator
     {
         if ($items instanceof Collection) {
             return $items->map(fn ($item) => $this->toEntity($item));

@@ -79,6 +79,8 @@ final class SpacesRepository extends Repository implements SpacesRepositoryContr
             userId: Uuid::fromString($space->user_id),
             name: $space->name,
             description: $space->description,
+            stacks: $space->relation('stacks'),
+            notebooks: $space->relation('notebooks'),
             createdAt: $space->created_at,
             updatedAt: $space->updated_at
         );

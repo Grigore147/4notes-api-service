@@ -9,6 +9,7 @@ use Ramsey\Uuid\UuidInterface;
 use App\Core\Domain\Entities\Entity;
 use App\Core\Support\Undefined;
 use App\Domains\Note\Domain\Entities\Contracts\StackEntityContract;
+use Illuminate\Support\Collection;
 
 final class Stack extends Entity implements StackEntityContract
 {
@@ -18,6 +19,7 @@ final class Stack extends Entity implements StackEntityContract
         UuidInterface|string|null $spaceId = null,
         mixed $space = null,
         string $name = '',
+        ?Collection $notebooks = null,
         ?Carbon $createdAt = null,
         ?Carbon $updatedAt = null
     ) {

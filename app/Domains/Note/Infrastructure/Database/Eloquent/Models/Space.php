@@ -44,7 +44,11 @@ final class Space extends BaseModel
         'description'
     ];
     protected $sortable = ['*'];
-    protected $includable = [];
+    protected $includable = [
+        'stacks',
+        'stacks.notebooks',
+        'notebooks'
+    ];
 
     public function stacks()
     {

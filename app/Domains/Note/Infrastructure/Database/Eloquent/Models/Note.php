@@ -14,8 +14,7 @@ final class Note extends BaseModel
 {
     use HasUuids, HasFactory;
 
-    public static $factory = NoteFactory::class;
-
+    public static string $factory = NoteFactory::class;
     public static string $builder = NoteBuilder::class;
 
     protected $keyType = 'string';

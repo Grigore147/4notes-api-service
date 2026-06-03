@@ -6,6 +6,8 @@ namespace App\Domains\Note\Presentation\Resources;
 
 use Illuminate\Http\Request;
 use App\Core\Presentation\Resources\JsonResource;
+use App\Domains\Note\Domain\Repositories\NotebooksRepository;
+use App\Domains\Note\Domain\Repositories\StacksRepository;
 
 /**
  * SpaceResource
@@ -37,7 +39,13 @@ final class SpaceResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'createdAt' => $this->createdAt,
-            'updatedAt' => $this->updatedAt
+            'updatedAt' => $this->updatedAt,
+            'stacks' => $this->whenHasCollection(
+                $this->stacks, fn () => StackCollection::make(app(StacksRepository::class)->toEntities($this->stacks)), $request
+            ),
+            'notebooks' => $this->whenHasCollection(
+                $this->notebooks, fn () => NotebookCollection::make(app(NotebooksRepository::class)->toEntities($this->notebooks)), $request
+            )
         ]);
     }
 }

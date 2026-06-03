@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domains\Note\Application\Queries\Space;
 
+use App\Core\Application\QueryBus\FilterableQuery;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use Illuminate\Http\Request;
@@ -12,6 +13,8 @@ use App\Core\Application\QueryBus\Query;
 
 final class GetSpaceById extends Query
 {
+    use FilterableQuery;
+
     public function __construct(
         /**
          * User
@@ -25,10 +28,21 @@ final class GetSpaceById extends Query
          *
          * @var string|UuidInterface $id
          */
-        public string|UuidInterface $id
+        public string|UuidInterface $id,
+
+        /**
+         * Filters
+         *
+         * @var array? $filters
+         */
+        public ?array $filters = []
     ) {
-        if (is_string($this->id)) {
-            $this->id = Uuid::fromString($this->id);
+        if (is_string($id)) {
+            $this->id = Uuid::fromString($id);
+            $this->filters['id'] = $id;
+        }
+        if ($user) {
+            $this->filters['userId'] = $user->id;
         }
     }
 
@@ -42,7 +56,8 @@ final class GetSpaceById extends Query
     {
         return new static(
             user: $request->user(),
-            id: $request->space->getId()
+            id: $request->space->getId(),
+            filters: $request->query()
         );
     }
 }

@@ -10,6 +10,7 @@ use App\Core\Domain\Entities\EntityContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\AbstractPaginator;
 
 /**
  * RepositoryContract
@@ -156,5 +157,5 @@ interface RepositoryContract
      * @param Collection|LengthAwarePaginator $items
      * @return Collection|LengthAwarePaginator
      */
-    public function toEntities(Collection|LengthAwarePaginator $items): Collection|LengthAwarePaginator;
+    public function toEntities(Collection|LengthAwarePaginator $items): Collection|AbstractPaginator|LengthAwarePaginator;
 }

@@ -22,6 +22,6 @@ final class GetSpaceByIdHandler
 
     public function handle(GetSpaceById $query): SpaceEntityContract
     {
-        return $this->spacesRepository->getById($query->id);
+        return $this->spacesRepository->getById($query->id, $query->filters);
     }
 }

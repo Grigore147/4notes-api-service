@@ -53,7 +53,7 @@ final class OrderingBuilder
             return [];
         }
 
-        // If the sorting parameter is an array, we assume that the structure is as follows: ['attr' => 'order']
+        // If the sorting parameter is an array, we assume that the structure is as follows: ['attr' => 'asc|desc']
         if (is_array($parameters['sort'])) {
             // Ensure that the order is either 'asc' or 'desc'
             array_walk($parameters['sort'], function (&$value) {
@@ -63,15 +63,22 @@ final class OrderingBuilder
             return $parameters['sort'];
         }
 
-        // If the sorting parameter is a string, we assume that the structure is as follows: 'attr1,attr2,-attr3'
+        // If the sorting parameter is a string, we assume that the structure is as follows: 'attr1,attr2,-attr3,attr:asc,attr:desc'
         $parameters = explode(',', $parameters['sort']);
 
         return array_reduce($parameters, function ($res, $attr) {
             $order = 'asc';
 
+            // Asc order by default, desc in case the attribute is prefixed with a dash
             if ($attr[0] === '-') {
                 $attr = substr($attr, 1);
                 $order = 'desc';
+            }
+            // Handle case when order is separated by a column, ex: attr:asc
+            if (str_contains($attr, ':')) {
+                [$attr, $order] = explode(':', $attr);
+                
+                $order = $order === 'desc' ? 'desc' : 'asc';
             }
 
             $res[$attr] = $order;

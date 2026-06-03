@@ -22,6 +22,6 @@ final class GetNoteByIdHandler
 
     public function handle(GetNoteById $query): NoteEntityContract
     {
-        return $this->notesRepository->getById($query->id);
+        return $this->notesRepository->getById($query->id, $query->filters);
     }
 }

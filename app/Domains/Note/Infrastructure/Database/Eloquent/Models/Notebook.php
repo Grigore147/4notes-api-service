@@ -17,8 +17,7 @@ final class Notebook extends BaseModel
 {
     use HasUuids, HasFactory;
 
-    public static $factory = NotebookFactory::class;
-
+    public static string $factory = NotebookFactory::class;
     public static string $builder = NotebookBuilder::class;
 
     protected $keyType = 'string';
