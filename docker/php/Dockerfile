@@ -1,4 +1,4 @@
-ARG PHP_VERSION="8.2-fpm-alpine"
+ARG PHP_VERSION="8.2.30-fpm-alpine3.22"
 ARG PHP_BASE_IMAGE="php:${PHP_VERSION}"
 ARG PHP_COMPOSER_VERSION="2.7.7"
 ARG NODE_VERSION="22.11.0-alpine3.20"
@@ -201,7 +201,7 @@ CMD ["php-fpm"]
 FROM php-fpm-base AS app-development
 
 ARG PHP_INI_DIR=/usr/local/etc/php
-ARG XDEBUG_VERSION=3.3.1
+ARG XDEBUG_VERSION=3.5.0
 
 ENV APP_ENV=dev
 ENV APP_DEBUG=1
@@ -211,7 +211,7 @@ USER root
 
 RUN apk --update add --no-cache curl htop wget && \
     apk --update add --no-cache --virtual .build-deps autoconf g++ libtool make pcre-dev && \
-    pecl install xdebug-${XDEBUG_VERSION} xhprof && \
+    pecl install xdebug xhprof && \
     docker-php-ext-enable xdebug xhprof && \
     apk del .build-deps && \
     rm -rf /var/cache/apk/* /tmp/*
